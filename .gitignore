@@ -19,3 +19,4 @@ logs/
 tmp/
 temp/
 scripts/
+go.mod
