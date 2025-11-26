@@ -30,7 +30,8 @@ func SetupRouter(handler *Handler, cfg RouterConfig) *gin.Engine {
 	router.Use(middleware2.RateLimiter(cfg.RedisClient, rateLimiterConfig, cfg.Logger))
 
 	// router.GET("/health", handler.HealthCheck)
-	v1 := router.Group("/api/v1")
+
+	// v1 := router.Group("/api/v1")
 	{
 
 	}

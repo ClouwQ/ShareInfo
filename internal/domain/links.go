@@ -6,7 +6,7 @@ type Link struct {
 	ID             int64     `json:"id" db:"id"`
 	Description    string    `json:"description" db:"description"`
 	IsActive       bool      `json:"is_active" db:"is_active"`
-	IsOnceDownload string    `json:"is_once_download" db:"is_once_download"`
+	IsOnceDownload bool      `json:"is_once_download" db:"is_once_download"`
 	ExpiresAt      time.Time `json:"expires_at" db:"expires_at"`
 	CreatedAt      time.Time `json:"created_at" db:"created_at"`
 }

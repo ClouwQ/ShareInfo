@@ -17,6 +17,7 @@ func NewPostgresConnection(cfg *config.DatabaseConfig, logger *zap.Logger) (*sql
 		zap.String("database", cfg.Password))
 
 	dsn := cfg.DSN()
+	logger.Info("Connecting to PostgreSQL with DSN", zap.String("dsn", dsn))
 	logger.Info(fmt.Sprintf("Database URL: %s", dsn))
 
 	db, err := sqlx.Connect("postgres", dsn)
