@@ -3,8 +3,10 @@ package link
 import (
 	"ShareInfo/internal/domain"
 	"ShareInfo/internal/repository/database"
+	"ShareInfo/internal/utils"
 	_ "ShareInfo/internal/utils"
 	"context"
+	"fmt"
 	"go.uber.org/zap"
 )
 
@@ -22,20 +24,56 @@ func NewLinkUseCase(logger *zap.Logger, linkRepo database.LinkRepository, fileRe
 	}
 }
 
-func (s Service) CreateLink(ctx context.Context, link domain.Link) error {
+func (s Service) CreateLink(ctx context.Context) (int64, error) {
 	// Генерируем, сохраняем, возвращаем, запускаем ttl на удаление, если файлов не было добавлено
-	//linkId, err := utils.GenerateLinkId(&s.LinkRepo)
-	//if err != nil {
-	//	return fmt.Errorf("error to create link id: %w", err)
-	//}
-	//link := domain.Link{
-	//	linkId: linkId,
-	//
-	//}
+	linkId, err := utils.GenerateLinkId(&s.LinkRepo)
+	if err != nil {
+		return 0, fmt.Errorf("error to create link id: %w", err)
 
+	}
+	link := domain.Link{
+		ID: linkId,
+	}
+	err = s.LinkRepo.Create(ctx, &link)
+	if err != nil {
+		return 0, fmt.Errorf("error to create link: %w", err)
+	}
+	return linkId, nil
 }
 
-func (s Service) GetLinkZipFiles(ctx context.Context, linkId domain.Link) (string, error) {
+func (s Service) Freeze(ctx context.Context, link domain.Link) error {
+	// Закидываем в большую бд
+	err := s.LinkRepo.Freeze(ctx, link)
+	if err != nil {
+		return fmt.Errorf("error to freeze link: %w", err)
+	}
+
+	// Кэшируем
+	// TODO добавить функционал кэширования
+
+	// TODO: откладываем удаление линки, если изменений не произойдет (не будут добавлены файлы)
+
+	return nil
+}
+
+// GetMeta собираем все метаданные о ссылки, но без чата
+func (s Service) GetMeta(ctx context.Context, linkId int64) (domain.LinkWithFilesMeta, error) {
+	var meta domain.LinkWithFilesMeta
+	linkMeta, err := s.LinkRepo.GetByID(ctx, linkId)
+	if err != nil {
+		return domain.LinkWithFilesMeta{}, fmt.Errorf("error to get link meta: %w", err)
+	}
+	filesMeta, err := s.UploadedFileRepo.GetAllByLinkId(ctx, linkId)
+	if err != nil {
+		return domain.LinkWithFilesMeta{}, fmt.Errorf("error to get files meta: %w", err)
+	}
+
+	meta.LinkMeta = *linkMeta
+	meta.FilesMeta = *filesMeta
+	return meta, nil
+}
+
+func (s Service) GetLinkZipFiles(ctx context.Context, linkId int64) (string, error) {
 	//TODO implement me
 	panic("implement me")
 }

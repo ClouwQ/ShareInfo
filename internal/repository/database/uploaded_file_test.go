@@ -21,7 +21,7 @@ func TestUploadedFileRepository_Create(t *testing.T) {
 	db, mock := setupMockDB(t)
 	repo := NewUploadedFileRepository(db)
 
-	file := &domain.UploadedFiles{
+	file := &domain.UploadedFile{
 		Name:      "file.txt",
 		Size:      1234,
 		Type:      "text/plain",

@@ -7,11 +7,17 @@ type Link struct {
 	Description    string    `json:"description" db:"description"`
 	IsActive       bool      `json:"is_active" db:"is_active"`
 	IsOnceDownload bool      `json:"is_once_download" db:"is_once_download"`
+	IsFrozen       bool      `json:"is_freezed" db:"is_freezed"`
 	ExpiresAt      time.Time `json:"expires_at" db:"expires_at"`
 	CreatedAt      time.Time `json:"created_at" db:"created_at"`
 }
 
 func (Link) TableName() string { return "links" }
+
+type LinkWithFilesMeta struct {
+	LinkMeta  Link
+	FilesMeta []UploadedFile
+}
 
 type LinksAnalytics struct {
 	LinkID         int64     `json:"link_id" db:"link_id"`

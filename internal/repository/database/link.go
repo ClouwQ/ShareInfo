@@ -81,7 +81,7 @@ func (r *LinkRepository) Delete(ctx context.Context, id int64) error {
 	})
 
 	errG.Go(func() error {
-		queryLinkAnalytics := `DELETE FROM links_analytics WHERE id = $1`
+		queryLinkAnalytics := `DELETE FROM links_analytics WHERE links_analytics.link_id = $1`
 		_, err := r.db.ExecContext(ctx, queryLinkAnalytics, id)
 		if err != nil {
 			return fmt.Errorf("failed to delete links_analytics: %w", err)
@@ -90,4 +90,28 @@ func (r *LinkRepository) Delete(ctx context.Context, id int64) error {
 	})
 
 	return errG.Wait()
+}
+
+// Freeze замораживает ссылку, говоря о том, что ее нельзя изменить и время удаления пошло
+func (r *LinkRepository) Freeze(ctx context.Context, link domain.Link) error {
+	query := `
+		UPDATE links SET is_frozen = true, is_active = true, is_once_download = $1, expires_at = $2, created_at = $3 WHERE id = $4
+`
+	_, err := r.db.ExecContext(ctx, query, link.IsOnceDownload, link.ExpiresAt, link.CreatedAt, link.ID)
+	if err != nil {
+		return fmt.Errorf("failed to freeze link: %w", err)
+	}
+	return nil
+}
+
+func (r *LinkRepository) UpdateDescription(ctx context.Context, id int64, description string) error {
+	query := `
+	UPDATE links SET description = $2 WHERE id = $1
+`
+	_, err := r.db.ExecContext(ctx, query, id, description)
+	if err != nil {
+		return fmt.Errorf("failed to update links description: %w", err)
+	}
+	return nil
+
 }

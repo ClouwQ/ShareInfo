@@ -15,7 +15,7 @@ func NewUploadedFileRepository(db *sqlx.DB) *UploadedFileRepository {
 	return &UploadedFileRepository{db: db}
 }
 
-func (r *UploadedFileRepository) Create(ctx context.Context, file *domain.UploadedFiles, linkId int64) error {
+func (r *UploadedFileRepository) Create(ctx context.Context, file *domain.UploadedFile, linkId int64) error {
 	query := `
 		INSERT INTO uploaded_files (link_id, name, size, type, created_at) VALUES ($1, $2, $3, $4, $5)
 	`
@@ -27,8 +27,8 @@ func (r *UploadedFileRepository) Create(ctx context.Context, file *domain.Upload
 	return nil
 }
 
-func (r *UploadedFileRepository) GetAllByLinkId(ctx context.Context, linkId int64) (*[]domain.UploadedFiles, error) {
-	var files []domain.UploadedFiles
+func (r *UploadedFileRepository) GetAllByLinkId(ctx context.Context, linkId int64) (*[]domain.UploadedFile, error) {
+	var files []domain.UploadedFile
 	query := `SELECT * FROM uploaded_files WHERE link_id = $1`
 	err := r.db.SelectContext(ctx, &files, query, linkId)
 	if err != nil {

@@ -2,7 +2,7 @@ package domain
 
 import "time"
 
-type UploadedFiles struct {
+type UploadedFile struct {
 	LinkId    int64     `json:"link_id" db:"link_id"`
 	Name      string    `json:"name" db:"name"`
 	Size      int64     `json:"size" db:"size"`
@@ -10,4 +10,4 @@ type UploadedFiles struct {
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }
 
-func (UploadedFiles) TableName() string { return "uploaded_files" }
+func (UploadedFile) TableName() string { return "uploaded_files" }
