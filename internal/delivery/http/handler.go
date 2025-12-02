@@ -1,6 +1,8 @@
 package http
 
 import (
+	"ShareInfo/internal/repository/database"
+	"ShareInfo/internal/usecase"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"net/http"
@@ -10,7 +12,13 @@ type Handler struct {
 	logger *zap.Logger
 
 	// Usecases
+	linkUseCase        usecase.Link
+	fileUseCase        usecase.UploadedFile
+	linkMessageUseCase usecase.LinkMessage
 
+	// Repository
+	linkRepo         database.LinkRepository
+	uploadedFileRepo database.UploadedFileRepository
 }
 
 func NewHandler() *Handler {

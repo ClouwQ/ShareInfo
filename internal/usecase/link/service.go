@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"go.uber.org/zap"
+	"time"
 )
 
 type Service struct {
@@ -33,7 +34,13 @@ func (s Service) CreateLink(ctx context.Context) (int64, error) {
 	}
 	link := domain.Link{
 		ID: linkId,
+		// Даем пользователю 15 мин на рассуждение
+		CreatedAt: time.Now(),
+		ExpiresAt: time.Now().Add(time.Minute * 15),
 	}
+
+	// TODO Запускаем функцию по отчистке ссылок (если в ссылке ничего не изменилось за 15 мин — удаляем)
+
 	err = s.LinkRepo.Create(ctx, &link)
 	if err != nil {
 		return 0, fmt.Errorf("error to create link: %w", err)
