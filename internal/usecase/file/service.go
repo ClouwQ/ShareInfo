@@ -54,11 +54,35 @@ func (s Service) SaveFile(ctx context.Context, file File) error {
 	return nil
 }
 
-func (s Service) GetFiles(ctx context.Context, linkId int64) error {
+// DeleteFile удаляет файл из ссылки: с диска, с бд, с кэша + проверяет не заморожена ли ссылка
+func (s Service) DeleteFile(ctx context.Context, linkId int64, fileName string) error {
+	// Проверяем доступность к удалению
+	link, err := s.LinkRepo.GetByID(ctx, linkId)
+	if err != nil {
+		return err
+	}
+
+	if !link.IsActive || link.IsFrozen {
+		return fmt.Errorf("link is not active or already frozen")
+	}
+
+	// Удаляем файл из бд
+	err = s.UploadedFileRepo.DeleteOneByName(ctx, fileName)
+	if err != nil {
+		return err
+	}
+
+	// Удаляем файл с диска
+	err = deleteFile(ctx, linkId, fileName)
+	if err != nil {
+		return err
+	}
+
+	// TODO Удалить файл из кэша
 	return nil
 }
 
-func (s Service) DeleteFile(ctx context.Context, linkId int64) error {
+func (s Service) GetFiles(ctx context.Context, linkId int64) error {
 	return nil
 }
 

@@ -12,6 +12,8 @@ type FileMetaRequest struct {
 	LinkID int64 `form:"link_id" binding:"required"`
 }
 
+// UploadFile godoc
+// @Summary Прикрепить/загрузить файл к ссылке
 func (h *Handler) UploadFile(c *gin.Context) {
 	var savedFile usecaseFileSerice.File
 	var req FileMetaRequest
@@ -53,4 +55,10 @@ func (h *Handler) UploadFile(c *gin.Context) {
 		return
 	}
 	RespondSuccess(c, http.StatusOK, "file_uploaded")
+}
+
+// DeleteFile godoc
+// @Summary Удалить файл из ссылки
+func DeleteFile(c *gin.Context) {
+	// Забираем файл из
 }

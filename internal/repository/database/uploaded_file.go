@@ -37,6 +37,15 @@ func (r *UploadedFileRepository) GetAllByLinkId(ctx context.Context, linkId int6
 	return &files, nil
 }
 
+func (r *UploadedFileRepository) DeleteOneByName(ctx context.Context, name string) error {
+	query := `DELETE FROM uploaded_files WHERE name = $1`
+	_, err := r.db.ExecContext(ctx, query, name)
+	if err != nil {
+		return fmt.Errorf("failed to delete uploaded file: %w", err)
+	}
+	return nil
+}
+
 func (r *UploadedFileRepository) DeleteAllByLinkId(ctx context.Context, linkId int64) error {
 	query := `DELETE FROM uploaded_files WHERE link_id = $1`
 	_, err := r.db.ExecContext(ctx, query, linkId)

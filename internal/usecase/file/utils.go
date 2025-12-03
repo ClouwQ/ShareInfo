@@ -72,3 +72,15 @@ func saveFileOnDisk(ctx context.Context, file File) error {
 	}
 	return nil
 }
+
+// deleteFile удаление файла из директории
+func deleteFile(ctx context.Context, linkId int64, fileName string) error {
+	filePath, err := getFilePath(linkId, fileName)
+	if err != nil {
+		return err
+	}
+	if err := os.Remove(filePath); err != nil {
+		return fmt.Errorf("failed to delete file %s: %w", filePath, err)
+	}
+	return nil
+}
