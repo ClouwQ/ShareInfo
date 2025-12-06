@@ -9,6 +9,7 @@ import (
 type Link interface {
 	Create(ctx context.Context) (int64, error)
 	Freeze(ctx context.Context, linkId int64) error
+	GetMeta(ctx context.Context, linkId int64) (domain.LinkWithFilesMeta, error)
 
 	GetLinkZipFiles(ctx context.Context, linkId domain.Link) (string, error)
 	DeleteLink(ctx context.Context, linkId int64) error // Удаляются все файлы внутри него

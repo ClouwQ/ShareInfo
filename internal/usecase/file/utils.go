@@ -56,6 +56,19 @@ func makeLinkDir(linkId int64) (string, bool, error) {
 	return dirPath, false, nil
 }
 
+// checkZipFile
+func checkZipFile(linkId int64) (bool, string, error) {
+	dirPath, err := getDirPath(linkId)
+	if err != nil {
+		return false, "", err
+	}
+	zipPath := dirPath + ".zip"
+	if _, err := os.Stat(zipPath); os.IsNotExist(err) {
+		return false, "", nil
+	}
+	return true, dirPath, nil
+}
+
 // saveFileOnDisk сохраняет файл в директорию
 func saveFileOnDisk(ctx context.Context, file File) error {
 	// Проверяем/создаем папку

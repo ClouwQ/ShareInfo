@@ -15,8 +15,9 @@ type Link struct {
 func (Link) TableName() string { return "links" }
 
 type LinkWithFilesMeta struct {
-	LinkMeta  Link
-	FilesMeta []UploadedFile
+	LinkMeta           Link           `json:"link_meta"`
+	FilesMeta          []UploadedFile `json:"files_meta"`
+	FileDownloadsCount int            `json:"file_downloads_count"`
 }
 
 type LinksAnalytics struct {

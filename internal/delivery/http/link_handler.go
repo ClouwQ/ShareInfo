@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -23,6 +24,23 @@ func (h *Handler) CreateLink(c *gin.Context) {
 	)
 
 	RespondSuccess(c, http.StatusOK, linkId)
+}
+
+// GetLink возвращает всю статистику по файлам
+func (h *Handler) GetLink(c *gin.Context) {
+	linkIdStr := c.Query("link_id")
+	linkId, err := strconv.ParseInt(linkIdStr, 10, 64)
+	if err != nil {
+		RespondError(c, http.StatusBadRequest, "bad_request", "Failed to parse link_id")
+	}
+
+	// забираем метаданные файлов
+	meta, err := h.linkUseCase.GetMeta(c.Request.Context(), linkId)
+	if err != nil {
+		RespondError(c, http.StatusInternalServerError, "internal_error", "Failed to get links meta")
+	}
+
+	RespondSuccess(c, http.StatusOK, meta)
 }
 
 type FreezeLinkRequest struct {

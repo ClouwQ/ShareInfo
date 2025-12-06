@@ -102,20 +102,28 @@ func (s Service) DownloadFiles(ctx context.Context, linkId int64) (string, error
 		return "", errors.New("link is not active")
 	}
 
-	// Получаем список файлов
-	files, err := s.UploadedFileRepo.GetAllByLinkId(ctx, linkId)
+	// Проверяем наличие собранного zip файла
+	haveZip, zipPath, err := checkZipFile(linkId)
 	if err != nil {
-		return "", fmt.Errorf("failed to fetch files: %w", err)
+		return "", err
 	}
+	// Если нет собранного zip, то создаем :)
+	if !haveZip {
+		// Получаем список файлов
+		files, err := s.UploadedFileRepo.GetAllByLinkId(ctx, linkId)
+		if err != nil {
+			return "", fmt.Errorf("failed to fetch files: %w", err)
+		}
 
-	if len(*files) == 0 {
-		return "", fmt.Errorf("no files found")
-	}
+		if len(*files) == 0 {
+			return "", fmt.Errorf("no files found")
+		}
 
-	// Отправляем на создание
-	zipPath, err := buildZipForLink(ctx, linkId, files)
-	if err != nil {
-		return "", fmt.Errorf("failed to build zip: %w", err)
+		// Отправляем на создание
+		zipPath, err = buildZipForLink(ctx, linkId, files)
+		if err != nil {
+			return "", fmt.Errorf("failed to build zip: %w", err)
+		}
 	}
 
 	// Инкриминируем счетчик в таблице аналитики
