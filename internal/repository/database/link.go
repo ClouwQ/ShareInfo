@@ -7,6 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"golang.org/x/sync/errgroup"
+	"time"
 )
 
 type LinkRepository struct {
@@ -113,5 +114,18 @@ func (r *LinkRepository) UpdateDescription(ctx context.Context, id int64, descri
 		return fmt.Errorf("failed to update links description: %w", err)
 	}
 	return nil
+}
 
+// NewDownload инкриминируем счетчик загрузок у аналитики и выставляем новую дату
+func (r *LinkRepository) IncrementDownloadsCount(ctx context.Context, linkId int64) error {
+	query := `
+		UPDATE links_analytics
+		SET downloads = downloads + 1, last_download_at = $1
+		WHERE link_id = $2
+		`
+	_, err := r.db.ExecContext(ctx, query, linkId, time.Now())
+	if err != nil {
+		return fmt.Errorf("failed to update links analytics: %w", err)
+	}
+	return nil
 }

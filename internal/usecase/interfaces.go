@@ -16,9 +16,10 @@ type Link interface {
 
 type UploadedFile interface {
 	SaveFile(ctx context.Context, file file.File) error
+	DeleteFile(ctx context.Context, linkId int64, fileName string) error
+	DownloadFiles(ctx context.Context, linkId int64) (string, error)
 
 	GetFiles(ctx context.Context, linkId int64) error
-	DeleteFile(ctx context.Context, fileName int64) error
 	DeleteFiles(ctx context.Context, linkId int64) error
 }
 

@@ -4,6 +4,7 @@ import (
 	"ShareInfo/internal/domain"
 	"ShareInfo/internal/repository/database"
 	"context"
+	"errors"
 	"fmt"
 	"go.uber.org/zap"
 	"time"
@@ -88,4 +89,40 @@ func (s Service) GetFiles(ctx context.Context, linkId int64) error {
 
 func (s Service) DeleteFiles(ctx context.Context, file domain.UploadedFile) error {
 	return nil
+}
+
+// DownloadFiles скачать все файлы в zip
+func (s Service) DownloadFiles(ctx context.Context, linkId int64) (string, error) {
+	// Проверяем возможность скачивания файла
+	link, err := s.LinkRepo.GetByID(ctx, linkId)
+	if err != nil {
+		return "", err
+	}
+	if !link.IsActive {
+		return "", errors.New("link is not active")
+	}
+
+	// Получаем список файлов
+	files, err := s.UploadedFileRepo.GetAllByLinkId(ctx, linkId)
+	if err != nil {
+		return "", fmt.Errorf("failed to fetch files: %w", err)
+	}
+
+	if len(*files) == 0 {
+		return "", fmt.Errorf("no files found")
+	}
+
+	// Отправляем на создание
+	zipPath, err := buildZipForLink(ctx, linkId, files)
+	if err != nil {
+		return "", fmt.Errorf("failed to build zip: %w", err)
+	}
+
+	// Инкриминируем счетчик в таблице аналитики
+	err = s.LinkRepo.IncrementDownloadsCount(ctx, linkId)
+	if err != nil {
+		return "", fmt.Errorf("failed to increment downloads count: %w", err)
+	}
+
+	return zipPath, nil
 }
