@@ -25,7 +25,7 @@ func NewLinkUseCase(logger *zap.Logger, linkRepo database.LinkRepository, fileRe
 	}
 }
 
-func (s Service) CreateLink(ctx context.Context) (int64, error) {
+func (s Service) Create(ctx context.Context) (int64, error) {
 	// Генерируем, сохраняем, возвращаем, запускаем ttl на удаление, если файлов не было добавлено
 	linkId, err := utils.GenerateLinkId(&s.LinkRepo)
 	if err != nil {

@@ -60,7 +60,7 @@ func NewRedisClient(cfg *config.RedisConfig, logger *zap.Logger) (*redis.Client,
 	return client, nil
 }
 
-func Close(ctx context.Context, client *redis.Client, logger zap.Logger) error {
+func Close(ctx context.Context, client *redis.Client, logger *zap.Logger) error {
 	logger.Info("closing redis client")
 
 	if err := client.Close(); err != nil {

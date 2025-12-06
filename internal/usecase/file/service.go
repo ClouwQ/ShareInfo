@@ -16,7 +16,7 @@ type Service struct {
 	logger           *zap.Logger
 }
 
-func NewService(logger *zap.Logger) *Service {
+func NewService(logger *zap.Logger, linkRepo database.LinkRepository, fileRepo database.UploadedFileRepository) *Service {
 	return &Service{
 		logger: logger,
 	}

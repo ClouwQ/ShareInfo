@@ -20,7 +20,17 @@ type FileDeleteMetaRequest struct {
 }
 
 // UploadFile godoc
-// @Summary Прикрепить/загрузить файл к ссылке
+// @Summary Загрузить файл к ссылке
+// @Description Прикрепляет файл к указанной ссылке. Поддерживает multipart/form-data
+// @Tags files
+// @Accept multipart/form-data
+// @Produce json
+// @Param link_id formData int64 true "ID ссылки"
+// @Param file formData file true "Файл для загрузки"
+// @Success 200 {object} map[string]interface{} "Файл загружен"
+// @Failure 400 {object} map[string]interface{} "Ошибка валидации или файл не найден"
+// @Failure 500 {object} map[string]interface{} "Внутренняя ошибка сервера"
+// @Router /files/upload [post]
 func (h *Handler) UploadFile(c *gin.Context) {
 	var savedFile usecaseFileSerice.File
 	var req FileUploadMetaRequest
@@ -69,6 +79,16 @@ func (h *Handler) UploadFile(c *gin.Context) {
 
 // DeleteFile godoc
 // @Summary Удалить файл из ссылки
+// @Description Удаляет конкретный файл по имени из ссылки
+// @Tags files
+// @Accept json
+// @Produce json
+// @Param link_id formData int64 true "ID ссылки"
+// @Param file_name formData string true "Имя файла для удаления"
+// @Success 200 {object} map[string]interface{} "Файл удален"
+// @Failure 400 {object} map[string]interface{} "Ошибка валидации параметров"
+// @Failure 500 {object} map[string]interface{} "Внутренняя ошибка сервера"
+// @Router /files/delete [delete]
 func (h *Handler) DeleteFile(c *gin.Context) {
 	// Забираем параметры запроса
 	var fileMeta FileDeleteMetaRequest
@@ -87,18 +107,28 @@ func (h *Handler) DeleteFile(c *gin.Context) {
 }
 
 // GetZipFiles godoc
-// @Summary получить zip всех файлов
+// @Summary Скачать все файлы ссылки в ZIP архиве
+// @Description Собирает все файлы ссылки в ZIP и инициирует скачивание
+// @Tags files
+// @Produce application/zip
+// @Param link_id query int64 true "ID ссылки"
+// @Success 200 {file} application/zip {filename}="file_{link_id}.zip" "ZIP архив файлов"
+// @Failure 400 {object} map[string]interface{} "Неверный link_id"
+// @Failure 500 {object} map[string]interface{} "Ошибка создания архива"
+// @Router /files/{id} [get]
 func (h *Handler) GetZipFiles(c *gin.Context) {
 	// получаем linkId
-	linkIdStr := c.Query("link_id")
+	linkIdStr := c.Param("link_id")
 	linkId, err := strconv.ParseInt(linkIdStr, 10, 64)
 	if err != nil {
 		RespondError(c, http.StatusBadRequest, "bad_request", "Failed to parse link_id")
+		return
 	}
 	// проверяем и собираем все файлы
 	zipPath, err := h.fileUseCase.DownloadFiles(c.Request.Context(), linkId)
 	if err != nil {
 		RespondError(c, http.StatusInternalServerError, "internal_server", "Failed to download file")
+		return
 	}
 	// отправляем файл
 	fileName := fmt.Sprintf("file_%d.zip", linkId)

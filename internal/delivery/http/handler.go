@@ -21,8 +21,22 @@ type Handler struct {
 	uploadedFileRepo database.UploadedFileRepository
 }
 
-func NewHandler() *Handler {
-	return &Handler{}
+func NewHandler(
+	logger *zap.Logger,
+	linkUseCase usecase.Link,
+	fileUseCase usecase.UploadedFile,
+	linkMessageUseCase usecase.LinkMessage,
+	linkRepo database.LinkRepository,
+	uploadedFileRepo database.UploadedFileRepository,
+) *Handler {
+	return &Handler{
+		logger:             logger,
+		linkUseCase:        linkUseCase,
+		fileUseCase:        fileUseCase,
+		linkMessageUseCase: linkMessageUseCase,
+		linkRepo:           linkRepo,
+		uploadedFileRepo:   uploadedFileRepo,
+	}
 }
 
 func (h *Handler) HealthCheck(c *gin.Context) {
