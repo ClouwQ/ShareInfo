@@ -19,6 +19,7 @@ import (
 	"syscall"
 	"time"
 
+	_ "ShareInfo/docs"
 	_ "go.uber.org/zap/zapcore"
 )
 
@@ -26,7 +27,7 @@ func main() {
 	// Загружаем config
 	cfg, err := config.NewConfig()
 	if err != nil {
-		panic(fmt.Sprintf("failed to load config: %v", err))
+		panic(fmt.Sprintf("failed to create config: %v", err))
 	}
 
 	logger := initLogger(cfg.Logger)
@@ -67,7 +68,7 @@ func main() {
 	logger.Info("repositories initialized")
 
 	// use cases
-	linkUsecase := linkUC.NewLinkUseCase(logger, *linkRepo, *fileRepo)
+	linkUsecase := linkUC.NewService(logger, *linkRepo, *fileRepo)
 	fileUsecase := fileUC.NewService(logger, *linkRepo, *fileRepo)
 
 	logger.Info("use cases initialized")

@@ -28,14 +28,16 @@ func Load() error {
 	}
 
 	if os.Getenv("ENVIRONMENT") == "" {
-		err := os.Setenv("ENVIRONMENT", *envFlag)
-		if err != nil {
-		}
+		os.Setenv("ENVIRONMENT", *envFlag)
 	}
 	return nil
 }
 
 func NewConfig() (*Config, error) {
+	err := Load()
+	if err != nil {
+		return nil, err
+	}
 	cfg := &Config{}
 	// сразу парсим файл в структуру
 	if err := env.Parse(cfg); err != nil {
@@ -53,16 +55,11 @@ func NewConfig() (*Config, error) {
 func (c *Config) Validate() error {
 	var missing []string
 
+	// Database validation
 	if c.Database.Host == "" {
 		missing = append(missing, "DB_HOST")
 	}
-	notAllowedPorts := []int{21, 23, 135, 139, 445, 3389, 1433, 3306, 5432, 5900, 6379}
 	if c.Database.Port == 0 {
-		for port := range notAllowedPorts {
-			if c.Database.Port == port {
-				return fmt.Errorf("not allowed port %d", c.Database.Port)
-			}
-		}
 		missing = append(missing, "DB_PORT")
 	}
 	if c.Database.User == "" {
@@ -72,18 +69,25 @@ func (c *Config) Validate() error {
 		missing = append(missing, "DB_PASSWORD")
 	}
 	if c.Database.DBName == "" {
-		missing = append(missing, "DBNAME")
+		missing = append(missing, "DB_NAME")
 	}
-	if c.Redis.Host == "" {
-		missing = append(missing, "REDIS_HOST")
-	}
+
+	// Server validation
 	if c.Server.Port == 0 {
 		missing = append(missing, "SERVER_PORT")
 	}
-	// Проверь другие "обязательные" параметры по аналогии
+
+	// Check for blocked ports
+	blockedPorts := map[int]bool{
+		21: true, 23: true, 135: true, 139: true, 445: true,
+		3389: true, 1433: true, 3306: true, 5432: true, 5900: true, 6379: true,
+	}
+	if blockedPorts[c.Server.Port] {
+		return fmt.Errorf("port %d is not allowed", c.Server.Port)
+	}
 
 	if len(missing) > 0 {
-		return fmt.Errorf("missing required config vars: %v", strings.Join(missing, ", "))
+		return fmt.Errorf("missing required config vars: %s", strings.Join(missing, ", "))
 	}
 	return nil
 }

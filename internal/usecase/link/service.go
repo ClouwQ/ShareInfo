@@ -17,7 +17,7 @@ type Service struct {
 	logger           *zap.Logger
 }
 
-func NewLinkUseCase(logger *zap.Logger, linkRepo database.LinkRepository, fileRepo database.UploadedFileRepository) *Service {
+func NewService(logger *zap.Logger, linkRepo database.LinkRepository, fileRepo database.UploadedFileRepository) *Service {
 	return &Service{
 		LinkRepo:         linkRepo,
 		UploadedFileRepo: fileRepo,

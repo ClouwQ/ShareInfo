@@ -3,6 +3,7 @@ package http
 import (
 	"ShareInfo/internal/domain"
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"net/http"
@@ -18,11 +19,12 @@ import (
 // @Produce json
 // @Success 200 {object} int64 "linkId создан"
 // @Failure 500 {object} map[string]interface{} "Внутренняя ошибка сервера"
-// @Router /links [post]
+// @Router /api/v1/links [post]
 func (h *Handler) CreateLink(c *gin.Context) {
 	// Создаем ссылку
 	linkId, err := h.linkUseCase.Create(context.Background())
 	if err != nil {
+		h.logger.Error(fmt.Sprintf("create link err: %s", err.Error()))
 		RespondError(c, http.StatusInternalServerError, "internal_error", "Failed to create link")
 		return
 	}
@@ -44,7 +46,7 @@ func (h *Handler) CreateLink(c *gin.Context) {
 // @Success 200 {object} object "Метаданные ссылки"
 // @Failure 400 {object} map[string]interface{} "Неверный ID ссылки"
 // @Failure 500 {object} map[string]interface{} "Внутренняя ошибка сервера"
-// @Router /links/{id} [get]
+// @Router /api/v1/links/{id} [get]
 func (h *Handler) GetLink(c *gin.Context) {
 	linkIdStr := c.Param("id")
 	linkId, err := strconv.ParseInt(linkIdStr, 10, 64)
@@ -82,7 +84,7 @@ type FreezeLinkRequest struct {
 // @Success 200 {object} domain.Link "Ссылка заморожена"
 // @Failure 422 {object} map[string]interface{} "Неверный JSON"
 // @Failure 500 {object} map[string]interface{} "Внутренняя ошибка сервера"
-// @Router /links/freeze [post]
+// @Router /api/v1/links/freeze [post]
 func (h *Handler) FreezeLink(c *gin.Context) {
 	var req FreezeLinkRequest
 	if err := c.ShouldBindBodyWithJSON(&req); err != nil {

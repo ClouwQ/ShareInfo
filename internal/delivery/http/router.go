@@ -39,11 +39,11 @@ func SetupRouter(handler *Handler, cfg RouterConfig) *gin.Engine {
 
 		v1.POST("/links", handler.CreateLink)
 		v1.GET("/links/:id", handler.GetLink)
-		v1.POST("links/freeze")
+		v1.POST("/links/freeze", handler.FreezeLink)
 
-		v1.POST("files/upload", handler.UploadFile)
-		v1.DELETE("files/delete", handler.DeleteFile)
-		v1.GET("files/:id", handler.GetZipFiles)
+		v1.POST("/files/upload", handler.UploadFile)
+		v1.DELETE("/files/delete", handler.DeleteFile)
+		v1.GET("/files/:id", handler.GetZipFiles)
 	}
 
 	return router

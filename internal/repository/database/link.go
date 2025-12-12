@@ -3,6 +3,8 @@ package database
 import (
 	"ShareInfo/internal/domain"
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -25,18 +27,19 @@ func (r *LinkRepository) Create(ctx context.Context, link *domain.Link) error {
 	// Запрос в Link
 	{
 		query := `
-			INSERT INTO links (description, is_active, is_once_download, expires_at, created_at)
+			INSERT INTO links (id, description, is_active, is_once_download, expires_at, created_at)
 			VALUES ($1, $2, $3, $4, $5, $6)
 			RETURNING id
 			`
 
-		err := r.db.QueryRowxContext(ctx, query,
+		_, err := r.db.ExecContext(ctx, query,
+			link.ID,
 			link.Description,
 			link.IsActive,
 			link.IsOnceDownload,
 			link.ExpiresAt,
 			link.CreatedAt,
-		).Scan(&link.ID)
+		)
 
 		if err != nil {
 			return fmt.Errorf("failed to create link: %w", err)
@@ -57,15 +60,32 @@ func (r *LinkRepository) Create(ctx context.Context, link *domain.Link) error {
 }
 
 func (r *LinkRepository) GetByID(ctx context.Context, id int64) (*domain.Link, error) {
-	var link *domain.Link
+	var link domain.Link
+
 	query := `
-		SELECT * FROM links WHERE id = $1
-	`
-	err := r.db.QueryRowxContext(ctx, query, id).Scan(&link)
-	if err != nil {
+        SELECT id, description, is_active, is_frozen, is_once_download,
+               created_at, expires_at
+        FROM links
+        WHERE id = $1
+    `
+
+	row := r.db.QueryRowxContext(ctx, query, id)
+	if err := row.Scan(
+		&link.ID,
+		&link.Description,
+		&link.IsActive,
+		&link.IsFrozen,
+		&link.IsOnceDownload,
+		&link.CreatedAt,
+		&link.ExpiresAt,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("link not found: %w", err)
+		}
 		return nil, fmt.Errorf("failed to fetch link: %w", err)
 	}
-	return link, nil
+
+	return &link, nil
 }
 
 func (r *LinkRepository) Delete(ctx context.Context, id int64) error {

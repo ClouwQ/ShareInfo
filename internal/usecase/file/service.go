@@ -18,7 +18,9 @@ type Service struct {
 
 func NewService(logger *zap.Logger, linkRepo database.LinkRepository, fileRepo database.UploadedFileRepository) *Service {
 	return &Service{
-		logger: logger,
+		logger:           logger,
+		LinkRepo:         linkRepo,
+		UploadedFileRepo: fileRepo,
 	}
 }
 
